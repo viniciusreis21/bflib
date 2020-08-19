@@ -14,9 +14,11 @@
 #include <random>
 #include <chrono>
 #include <thread>
+#include <iostream>
 #include <vector>
 
 using namespace Eigen;
+using namespace std;
 
 template <typename dataType, int states, int inputs, int outputs, int outputSize>
 class PF
@@ -239,6 +241,33 @@ class PF
 
             xK = x;
         }
+	
+	void VaryN(float error, int Nmin, int Ni, float error_lim, int Nmax)
+	{
+	    int Np=0;
+	    if(error>error_lim)
+	    {
+	    	float l;
+	    
+            	l = round(error/error_lim);
+	    	int k = (int)l;
+                Np = Nmin + Ni*k;
+            	if(Np > Nmax)
+		{
+			this->N = Nmax;
+		}
+		else
+		{
+			this->N = Np;
+		}
+            }
+	    else
+	    {
+                Np = Nmin;
+		this->N = Np;
+            }
+	  cout << this-> N << endl;
+	}
 
     private:
         void initW()

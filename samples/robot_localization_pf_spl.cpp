@@ -15,6 +15,8 @@ namespace plt = matplotlibcpp;
 #include <opencv2/opencv.hpp>
 #endif
 
+#define CONTROL_P
+
 const float PI = 3.14159265358979f;
 
 // Number of sensor readings
@@ -38,17 +40,17 @@ vector< Vector4d > lines{   Vector4d(0.000,   0.000,   4.680,   0.000),
                             Vector4d(0.000,   0.000,   0.000,   3.200),
                             Vector4d(0.000,   3.200,   4.680,   3.200),
                             Vector4d(4.680,   0.000,   4.680,   3.200),
-		            Vector4d(2.340,   0.000,   2.340,   3.200),
-			    Vector4d(0.000,   1.010,   0.312,   1.010),
-			    Vector4d(0.000,   2.190,   0.312,   2.190),
-			    Vector4d(0.312,   1.010,   0.312,   2.190),
-			    Vector4d(4.680,   1.010,   4.368,   1.010),
-			    Vector4d(4.680,   2.190,   4.368,   2.190),
-			    Vector4d(4.368,   1.010,   4.368,   2.190),
-			    Vector4d(0.650,   1.600,   0.702,   1.600),
-			    Vector4d(0.676,   1.574,   0.676,   1.626),
-			    Vector4d(3.978,   1.600,   4.030,   1.600),
-			    Vector4d(4.004,   1.574,   4.004,   1.626)		
+		                    Vector4d(2.340,   0.000,   2.340,   3.200),
+			                Vector4d(0.000,   1.010,   0.312,   1.010),
+			                Vector4d(0.000,   2.190,   0.312,   2.190),
+			                Vector4d(0.312,   1.010,   0.312,   2.190),
+			                Vector4d(4.680,   1.010,   4.368,   1.010),
+			                Vector4d(4.680,   2.190,   4.368,   2.190),
+			                Vector4d(4.368,   1.010,   4.368,   2.190),
+			                Vector4d(0.650,   1.600,   0.702,   1.600),
+			                Vector4d(0.676,   1.574,   0.676,   1.626),
+			                Vector4d(3.978,   1.600,   4.030,   1.600),
+			                Vector4d(4.004,   1.574,   4.004,   1.626)		
  };
                            // Vector4d(0.000,  2.280,   0.920,   2.280),
                            // Vector4d(0.920,  2.280,   0.920,   3.200),
@@ -134,6 +136,26 @@ void sensor(vector<Robot::Output> &y, Robot::State &x, double dt)
     }
 }
 
+float mod(float a, float m)
+{
+    return a - m*floor(a/m);
+}
+
+float fixAngle(float theta)
+{
+    float phi;
+
+    phi = mod(theta,2*PI);
+    
+    if(phi > PI)
+    {
+        phi = phi - 2*PI;
+
+    }
+
+    return phi;
+}
+
 #ifdef PLOT_REALTIME
 void drawLines(cv::Mat& image, const vector< Vector4d >& lines, const cv::Scalar& color)
 {
@@ -207,7 +229,12 @@ int main(int argc, char *argv[])
 
     // Number of particles
     int N = 1000 ;
-
+    int Nmin = 100;
+    int Ni = 1;
+    float error_lim = 0.01;
+    float error = 0;
+    float dx,dy;	
+	float k[3] = {0.182,0.420,-0.182};
     // Create a new monte carlo filter for the robot with max of 1000 particles
     Robot pf(N, minState, maxState);
 
@@ -232,7 +259,9 @@ int main(int argc, char *argv[])
     pf.setR(R);
 
     // Variables to hold the system state, the predicted state and the input
+
     Robot::State x(2.000, 1.000, 0);
+    Robot::State xF(1.000,2.000, PI);
     Robot::State xP;
     Robot::Input u;
 
@@ -261,6 +290,14 @@ int main(int argc, char *argv[])
     {
         // Simulate one frame to get the sensor readings
         // This is not necessary on a real system as the y vector will come from a real sensor
+        #ifdef CONTROL_P
+            float a,b;
+            a = mod(3*PI/2,2*PI);
+            b = fixAngle(3*PI);
+            cout << "mod:" << a << "fix:" << b << endl;
+            
+        #endif
+
         pf.simulate(x, y, u, dt);
         // Run the PF with the sensor readings
         pf.run(xP, y, u, dt);
@@ -272,7 +309,12 @@ int main(int argc, char *argv[])
         XP.push_back(xP(0));
         YP.push_back(xP(1));
 
-        //cout << "x = " << x << endl;
+        // Descomente para varia o número de partículas
+  	    //dx = (x(0) - xP(0));
+	    //dy = (x(1) - xP(1));
+	    //error = sqrt(dx*dx + dy*dy);
+	    //pf.VaryN(error,Nmin,Ni,error_lim,N);
+        //cout << "error = " << error << endl;
         //cout << "xP = " << xP << endl;
 
         // Increment the simulation time
