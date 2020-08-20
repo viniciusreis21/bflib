@@ -16,6 +16,7 @@ namespace plt = matplotlibcpp;
 #endif
 
 #define CONTROL_P
+//#define IGUIM_CONTROL
 
 const float PI = 3.14159265358979f;
 
@@ -40,14 +41,14 @@ vector< Vector4d > lines{   Vector4d(0.000,   0.000,   4.680,   0.000),
                             Vector4d(0.000,   0.000,   0.000,   3.200),
                             Vector4d(0.000,   3.200,   4.680,   3.200),
                             Vector4d(4.680,   0.000,   4.680,   3.200),
-		                    Vector4d(2.340,   0.000,   2.340,   3.200),
+		                    Vector4d(2.340,   0.000,   2.340,   3.200), // linha do meio de campo
 			                Vector4d(0.000,   1.010,   0.312,   1.010),
 			                Vector4d(0.000,   2.190,   0.312,   2.190),
 			                Vector4d(0.312,   1.010,   0.312,   2.190),
 			                Vector4d(4.680,   1.010,   4.368,   1.010),
 			                Vector4d(4.680,   2.190,   4.368,   2.190),
 			                Vector4d(4.368,   1.010,   4.368,   2.190),
-			                Vector4d(0.650,   1.600,   0.702,   1.600),
+			                Vector4d(0.650,   1.600,   0.702,   1.600), // linha horizontal da cruz esquerda
 			                Vector4d(0.676,   1.574,   0.676,   1.626),
 			                Vector4d(3.978,   1.600,   4.030,   1.600),
 			                Vector4d(4.004,   1.574,   4.004,   1.626)		
@@ -156,6 +157,39 @@ float fixAngle(float theta)
     return phi;
 }
 
+float hyperbolicSpiral(Robot::State x, float thetaDir, Robot::State goal)
+{
+    float thetaUp,thetaDown,rhoUp,rhoDown;
+    float phi;
+
+    //   gSizeW = 0.2;
+    // deW = 2.2;
+    // KrW = 0.5;
+    float Kr=0.05,de=0.44,gSize=0.02;
+    Vector3d p(x(0),x(1),1),ph(0,0,0);
+
+    MatrixXd m_trans(3,3),m_rot(3,3);
+    m_trans  << 1, 0, -goal(0), 0, 1, -goal(1), 0, 0, 1;
+    m_rot << cos(-thetaDir),-sin(-thetaDir),0,sin(-thetaDir),cos(-thetaDir),0,0,0,1;
+
+    ph = m_rot*m_trans*p;
+
+    thetaUp = atan2((ph(1)-de-gSize),ph(0)) + thetaDir;
+    thetaDown = atan2((ph(1)+de+gSize),ph(0)) + thetaDir;
+    rhoUp = sqrt(pow(ph(0),2) + pow((ph(1)-de-gSize),2));
+    rhoDown = sqrt(pow(ph(0),2) + pow((ph(1)+de+gSize),2));
+
+    if (ph(1)>gSize)
+        phi = thetaUp + PI*(2-(de+Kr)/(rhoUp+Kr))/2;
+    else if (ph(1)< -gSize)
+        phi = thetaDown - PI*(2-(de+Kr)/(rhoDown+Kr))/2;
+    else
+        phi = thetaDir;
+
+    return phi;
+}
+
+
 #ifdef PLOT_REALTIME
 void drawLines(cv::Mat& image, const vector< Vector4d >& lines, const cv::Scalar& color)
 {
@@ -234,7 +268,7 @@ int main(int argc, char *argv[])
     float error_lim = 0.01;
     float error = 0;
     float dx,dy;	
-	float k[3] = {0.182,0.420,-0.182};
+	
     // Create a new monte carlo filter for the robot with max of 1000 particles
     Robot pf(N, minState, maxState);
 
@@ -260,8 +294,7 @@ int main(int argc, char *argv[])
 
     // Variables to hold the system state, the predicted state and the input
 
-    Robot::State x(2.000, 1.000, 0);
-    Robot::State xF(1.000,2.000, PI);
+    Robot::State x(0.676f,1.600f, PI*0.5);
     Robot::State xP;
     Robot::Input u;
 
@@ -269,7 +302,7 @@ int main(int argc, char *argv[])
     vector<Robot::Output> y(S);
 
     // Initializes the input variable (linear speed = 1.0f m/s ; angular speed = 0.2f rad/s)
-    u << 1.0000f, 1.57f;
+    u << 0.0f, 0.0f;
     // u << 0, 0;
 
     // Auxiliary variables to plot
@@ -279,10 +312,26 @@ int main(int argc, char *argv[])
     double T = 50;
     double dt = 0.01;
 
-    // Realtime plot initialization
+    // Realtime plot initialization                 
+                // xF(0) = 4.680 - 0.676;
+                // xF(1) = 1.600;
+                //xF(2) = PI/4;
     #ifdef PLOT_REALTIME
     cv::Mat image(500, 500, CV_8UC3);
     #endif
+    #ifdef CONTROL_P
+            float ex,ey,eth,dp,gamma,alpha,beta,v=1.0f,w=1.57f;
+            float eps=0.01,ki=0.005,P=0;
+            Robot::State xF(4.680f - 0.676f,1.600f, PI/2);
+            float k[3] = {0.22,0.62,-0.12};
+
+    #endif 
+        
+    #ifdef IGUIM_CONTROL
+        float theta,v=0.50f,lastAlpha=0,alpha,beta,ex,ey,gamma,kp=1,kd=0.0f;
+        Robot::State xF(4.680f - 0.676f,1.600f, 0);
+    #endif
+ 
 
     // Run the simulation
     double t = 0;
@@ -291,13 +340,78 @@ int main(int argc, char *argv[])
         // Simulate one frame to get the sensor readings
         // This is not necessary on a real system as the y vector will come from a real sensor
         #ifdef CONTROL_P
-            float a,b;
-            a = mod(3*PI/2,2*PI);
-            b = fixAngle(3*PI);
-            cout << "mod:" << a << "fix:" << b << endl;
+            // float a,b;
+            // a = mod(3*PI/2,2*PI);
+            // b = fixAngle(3*PI);
+            // cout << "mod:" << a << "fix:" << b << endl;
+        
+
+
+            ex = xF(0) - x(0);
+            ey = xF(1) - x(1);
+
+            dp = sqrt(ex*ex + ey*ey);
+           // P+=dp*dt;
+            cout << "erro = " << dp << "   "<< "Ierro=" << P << endl;
+            eth = fixAngle(xF(2) - x(2));
+
+
+            if( (abs(dp) > eps) ) //|| (abs(eth) > eps*PI) )
+            {
+                gamma = atan2(ey,ex);
+                alpha = fixAngle(gamma - x(2));
+                beta = fixAngle(xF(2) - gamma);
+                u(0) = min(k[0]*dp ,v); // + ki*P
+                // if((-1*PI < alpha < -1*PI/2)||(PI/2 < alpha < PI))
+                // {
+                //     u(0) = -1*u(0);
+                //     alpha = fixAngle(alpha + PI);
+                //     beta = fixAngle(beta + PI);
+
+                // }
+                u(1) = k[1]*alpha + k[2]*beta;
+                x(0) += u(0)*cos(x(2))*dt;
+                x(1) += u(0)*sin(x(2))*dt;
+                //x(2) = hyperbolicSpiral(x,beta);
+                x(2) += u(1)*dt;
+            }
+            else
+            {
+                u(0) = 0.0f;
+                u(1) = 0.0f;
+                xF(0) = 0.676f;
+                xF(1) = 1.600f;
+                xF(2) = PI*0.5 ;
+
+            }
+            cout << " x "<< xF(0)<< " " << " y " << xF(1) << endl;
             
         #endif
 
+        #ifdef IGUIM_CONTROL
+
+            ex = xF(0) - x(0);
+            ey = xF(1) - x(1);
+            gamma = atan2(ey,ex);
+            beta = fixAngle(xF(2) - gamma);
+
+            theta = hyperbolicSpiral(x,beta,xF);     
+            alpha = theta - x(2);
+            alpha = fixAngle(alpha);
+
+            u(0) =  -v*fabs((alpha)/PI) + v; // -vDeltaGolfabs(alpha)/limiarTheta
+            u(1) = kp*alpha/PI + kd*(alpha - lastAlpha);
+            lastAlpha = alpha;
+            
+            cout << alpha << endl;
+
+            x(0) += u(0)*cos(x(2))*dt;
+            x(1) += u(1)*sin(x(2))*dt;
+            x(2) += u(1)*dt;
+
+        #endif
+        
+        // cout << hyperbolicSpiral(x,0.0f) << endl;
         pf.simulate(x, y, u, dt);
         // Run the PF with the sensor readings
         pf.run(xP, y, u, dt);
@@ -326,6 +440,7 @@ int main(int argc, char *argv[])
 
         drawLines(image, lines, cv::Scalar(0, 0, 0));
         drawParticles(image, pf.particles(), cv::Scalar(255, 0, 0));
+        drawSensor(image, x, y, cv::Scalar(0, 255, 0));
         drawSensor(image, xP, y, cv::Scalar(0, 255, 0));
         drawPath(image, x, X, Y, cv::Scalar(0, 0, 0), false);
         drawPath(image, xP, XP, YP, cv::Scalar(0, 0, 255), false);
