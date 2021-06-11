@@ -2,15 +2,12 @@
 #define DRAWING_H
 
 #include <iostream>
-<<<<<<< HEAD
 #include <string>	
 #include <opencv2/opencv.hpp>
-=======
 #include <string>
 #include <vector>
 #include <cmath>
 #include "BFLIB/PF.hpp"
->>>>>>> 8e4e73c3088402e16f1b714570b82d6862a38136
 
 using namespace std;
 
@@ -30,25 +27,18 @@ class Drawing
         ~Drawing();
         /** Destructor for Drawing class
          */
-<<<<<<< HEAD
          void function_test();
-
-         void drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::Scalar& color);
-        /** Method that creates particle simulations
-         */ 
         
         void drawLandmarks();
         /**
          * Drawing Landmarks in map
         */
-=======
         void teste2();
         void drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::Scalar& color)
         /** Method that creates particle simulations
          */
         void teste33333333();
 
->>>>>>> 8e4e73c3088402e16f1b714570b82d6862a38136
 
 };
 
