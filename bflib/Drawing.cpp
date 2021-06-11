@@ -8,7 +8,10 @@ Drawing::~Drawing()
 {
 
 }
-
+void Drawing::function_test()
+{
+    
+}
 void Drawing::drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::Scalar& color)
 {
     for(int i = 0; i < PS.size(); i++)
