@@ -18,4 +18,8 @@ void Drawing::drawParticles(cv::Mat& image, const vector< Robot::State >& PS, co
     {
         cv::circle(image, cv::Point(10 + 100 * PS[i][0], 10 + 100 * PS[i][1]), 2, color, CV_FILLED);
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> refs/remotes/origin/develop
