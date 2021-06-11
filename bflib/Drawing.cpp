@@ -51,7 +51,7 @@ void Drawing::drawLandmarks()
 }
 
 
-//-----------MEU----------
+//-----------Pedro----------
 void Drawing::drawLines(cv::Mat &image, const cv::Scalar &color)
 {
     for (int i = 0; i < this->lines.size(); i++)
