@@ -1,4 +1,5 @@
 #include <bflib/PF.hpp>
+#include "bflib/Drawing.h"
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -37,7 +38,7 @@ Robot::State minState(0.000, 0.000, 0);
 Robot::State maxState(4.680, 3.200, 2 * PI);
 
 // World lines
-vector<Vector4d> lines{Vector4d(0.000, 0.000, 4.680, 0.000),
+/*vector<Vector4d> lines{Vector4d(0.000, 0.000, 4.680, 0.000),
                        Vector4d(0.000, 0.000, 0.000, 3.200),
                        Vector4d(0.000, 3.200, 4.680, 3.200),
                        Vector4d(4.680, 0.000, 4.680, 3.200),
@@ -56,7 +57,8 @@ vector<Vector4d> lines{Vector4d(0.000, 0.000, 4.680, 0.000),
 // Vector4d(0.920,  2.280,   0.920,   3.200),
 // Vector4d(4.190,  2.850,   4.680,   2.850),
 // Vector4d(4.190,  2.850,   4.190,   3.200),
-// Vector4d(4.030,  0.000,   4.680,   0.650)
+// Vector4d(4.030,  0.000,   4.680,   0.650)  */
+
 /*
     The model function
     -------------------------
@@ -294,16 +296,17 @@ float hyperbolicSpiral(Robot::State x, float thetaDir, Robot::State goal)
 }
 
 #ifdef PLOT_REALTIME
-void drawLines(cv::Mat &image, const vector<Vector4d> &lines, const cv::Scalar &color)
+/*void drawLines(cv::Mat &image, const vector<Vector4d> &fieldLines.lines, const cv::Scalar &color)
 {
-    for (int i = 0; i < lines.size(); i++)
+    for (int i = 0; i < fieldLines.lines.size(); i++)
     {
         cv::line(image,
-                 cv::Point(10 + lines[i](0) * 100, 10 + lines[i](1) * 100),
-                 cv::Point(10 + lines[i](2) * 100, 10 + lines[i](3) * 100),
+                 cv::Point(10 + fieldLines.lines[i](0) * 100, 10 + fieldLines.lines[i](1) * 100),
+                 cv::Point(10 + fieldLines.lines[i](2) * 100, 10 + fieldLines.lines[i](3) * 100),
                  color, 2);
     }
-}
+}*/
+
 
 void drawParticles(cv::Mat &image, const vector<Robot::State> &PS, const cv::Scalar &color)
 {
@@ -393,6 +396,7 @@ void drawSensor(cv::Mat &image, const Robot::State &X, const cv::Scalar &color)
 
 int main(int argc, char *argv[])
 {
+    Drawing fieldLines;
     // Defines the standard deviations for the resample and the sensor
     double sigma_x_x = 0.04;
     double sigma_x_y = 0.04;
@@ -615,7 +619,8 @@ int main(int argc, char *argv[])
 #ifdef PLOT_REALTIME
         image.setTo(cv::Scalar(255, 255, 255));
 
-        drawLines(image, lines, cv::Scalar(0, 0, 0));
+        fieldLines.drawLines(image, cv::Scalar(0, 0, 0)); //modificar?
+
         drawFieldCenter(image);
         //drawLines(img, lines, cv::Scalar(0, 0, 0));
         drawFeatures(image, FeatureMap, cv::Scalar(255, 0, 0));
@@ -640,14 +645,14 @@ int main(int argc, char *argv[])
 #if defined PLOT && !defined PLOT_REALTIME
     vector<double> x_, y_;
     plt::title("Position");
-    for (int i = 0; i < lines.size(); i++)
+    for (int i = 0; i < fieldLines.lines.size(); i++)
     {
         x_.resize(2);
         y_.resize(2);
-        x_[0] = lines[i](0);
-        y_[0] = lines[i](1);
-        x_[1] = lines[i](2);
-        y_[1] = lines[i](3);
+        x_[0] = fieldLines.lines[i](0);
+        y_[0] = fieldLines.lines[i](1);
+        x_[1] = fieldLines.lines[i](2);
+        y_[1] = fieldLines.lines[i](3);
         plt::plot(x_, y_, "k");
     }
     for (int i = 0; i < pf.particles().size(); i++)

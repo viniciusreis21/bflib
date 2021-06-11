@@ -4,7 +4,6 @@
 #include <iostream>
 #include <string>	
 #include <opencv2/opencv.hpp>
-#include <string>
 #include <vector>
 #include <cmath>
 #include "BFLIB/PF.hpp"
@@ -39,6 +38,12 @@ class Drawing
          */
         void teste33333333();
 
+        // ---------------Meu---------------
+
+        vector<Vector4d> lines;
+    
+        //void setLines(const vector<Vector4d>);
+        void drawLines(cv::Mat &image, const cv::Scalar &color);
 
 };
 
