@@ -6,6 +6,7 @@
 #include <vector>
 #include <cmath>
 #include "BFLIB/PF.hpp"
+#include <opencv2/opencv.hpp>
 
 using namespace std;
 
@@ -24,9 +25,11 @@ class Drawing
         /** Destructor for Drawing class
          */
 
-        void drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::Scalar& color)
+        void drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::Scalar& color);
         /** Method that creates particle simulations
          */ 
+
+        void drawSensor(cv::Mat &image, const Robot::State &X, const cv::Scalar &color);
 
 };
 
