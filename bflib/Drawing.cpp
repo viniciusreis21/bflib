@@ -8,3 +8,7 @@ Drawing::~Drawing()
 {
 
 }
+void Drawing::function_test()
+{
+    
+}
