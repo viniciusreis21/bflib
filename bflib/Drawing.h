@@ -2,8 +2,10 @@
 #define DRAWING_H
 
 #include <iostream>
-#include <string>	
-
+#include <string>
+#include <vector>
+#include <cmath>
+#include <opencv2/opencv.hpp>
 
 using namespace std;
 
@@ -15,12 +17,13 @@ using namespace std;
 class Drawing
 {
     public:
-        Drawing();
-        /** Constructor for Drawing class
-         */ 
-        ~Drawing();
-        /** Destructor for Drawing class
-         */
+        vector<Vector4d> lines;
+
+        Drawing(); //Constructor for Drawing class
+        ~Drawing(); //Destructor for Drawing class
+    
+        //void setLines(const vector<Vector4d>);
+        void drawLines(cv::Mat &image, const cv::Scalar &color);
 
 };
 
