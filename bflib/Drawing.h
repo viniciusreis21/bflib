@@ -3,9 +3,7 @@
 
 #include <iostream>
 #include <string>	
-#include <vector>
-#include <cmath>
-#include "BFLIB/PF.hpp"
+#include <opencv2/opencv.hpp>
 
 using namespace std;
 
@@ -23,10 +21,16 @@ class Drawing
         ~Drawing();
         /** Destructor for Drawing class
          */
+         void function_test();
 
-        void drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::Scalar& color)
+         void drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::Scalar& color);
         /** Method that creates particle simulations
          */ 
+        
+        void drawLandmarks();
+        /**
+         * Drawing Landmarks in map
+        */
 
 };
 
