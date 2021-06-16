@@ -62,3 +62,7 @@ void Drawing::drawLines(cv::Mat &image, const cv::Scalar &color)
                  color, 2);
     }
 }
+void Drawing::teste3()
+{
+
+}

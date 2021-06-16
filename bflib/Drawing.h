@@ -33,6 +33,8 @@ class Drawing
          * Drawing Landmarks in map
         */
         void teste2();
+
+        void teste3();
         void drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::Scalar& color)
         /** Method that creates particle simulations
          */
