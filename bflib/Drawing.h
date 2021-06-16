@@ -7,6 +7,7 @@
 #include <vector>
 #include <cmath>
 #include "BFLIB/PF.hpp"
+#include <opencv2/opencv.hpp>
 
 using namespace std;
 
@@ -36,6 +37,7 @@ class Drawing
 
         void teste3();
         void drawParticles(cv::Mat& image, const vector< Robot::State >& PS, const cv::Scalar& color)
+
         /** Method that creates particle simulations
          */
         void teste33333333();
@@ -46,6 +48,8 @@ class Drawing
     
         //void setLines(const vector<Vector4d>);
         void drawLines(cv::Mat &image, const cv::Scalar &color);
+
+        void drawSensor(cv::Mat &image, const Robot::State &X, const cv::Scalar &color);
 
 };
 
