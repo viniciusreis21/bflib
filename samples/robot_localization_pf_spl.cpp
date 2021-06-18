@@ -31,7 +31,7 @@ const int S = 9;
     2 inputs (linear and angular speeds)
     2 outputs (range and bearing) * S sensors
 */
-typedef PF<double, 3, 2, 2, S> Robot;
+
 
 // Limits of the world
 Robot::State minState(0.000, 0.000, 0);
@@ -324,7 +324,7 @@ void drawFeatures(cv::Mat &image, vector<Vector3d> &PS, const cv::Scalar &color)
     }
 }
 
-void drawPath(cv::Mat &image, const Robot::State &XR, const vector<double> &X, const vector<double> &Y, const cv::Scalar &color, bool strip)
+/*void drawPath(cv::Mat &image, const Robot::State &XR, const vector<double> &X, const vector<double> &Y, const cv::Scalar &color, bool strip)
 {
     int S = min(X.size(), Y.size());
     vector<cv::Point> points(S);
@@ -347,7 +347,7 @@ void drawPath(cv::Mat &image, const Robot::State &XR, const vector<double> &X, c
     pf.x = (10 + 100 * XR[0]) + 10 * cos(XR[2]);
     pf.y = (10 + 100 * XR[1]) + 10 * sin(XR[2]);
     cv::line(image, points.back(), pf, color, 2);
-}
+}*/
 
 void drawFieldCenter(cv::Mat &image)
 {   
@@ -397,6 +397,8 @@ void drawSensor(cv::Mat &image, const Robot::State &X, const cv::Scalar &color)
 int main(int argc, char *argv[])
 {
     Drawing fieldLines;
+    Drawing obj;//teste
+    
     // Defines the standard deviations for the resample and the sensor
     double sigma_x_x = 0.04;
     double sigma_x_y = 0.04;
@@ -617,6 +619,7 @@ int main(int argc, char *argv[])
 
 // Realtime plot
 #ifdef PLOT_REALTIME
+
         image.setTo(cv::Scalar(255, 255, 255));
 
         fieldLines.drawLines(image, cv::Scalar(0, 0, 0)); //modificar?
@@ -627,7 +630,7 @@ int main(int argc, char *argv[])
         //drawParticles(image, pf.particles(), cv::Scalar(255, 0, 0));
         drawSensor(image, x, cv::Scalar(0, 255, 0));
         //drawSensor(image, xP, y, cv::Scalar(0, 255, 0));
-        drawPath(image, x, X, Y, cv::Scalar(0, 0, 0), false);
+        obj.drawPath(image, x, X, Y, cv::Scalar(0, 0, 0), false);
         //drawPath(image, xP, XP, YP, cv::Scalar(0, 0, 255), false);
         DetectFeatures(image,x,y,FeatureMap);
 

@@ -51,7 +51,7 @@ void Drawing::drawLandmarks()
 }
 
 
-//-----------Pedro----------
+//-----------Pedro---------- DrawLines e DrawPath
 void Drawing::drawLines(cv::Mat &image, const cv::Scalar &color)
 {
     for (int i = 0; i < this->lines.size(); i++)
@@ -61,4 +61,29 @@ void Drawing::drawLines(cv::Mat &image, const cv::Scalar &color)
                  cv::Point(10 + this->lines[i](2) * 100, 10 + this->lines[i](3) * 100),
                  color, 2);
     }
+}
+
+void Drawing::drawPath(cv::Mat &image, const Robot::State &XR, const vector<double> &X, const vector<double> &Y, const cv::Scalar &color, bool strip)
+{
+    int S = min(X.size(), Y.size());
+    vector<cv::Point> points(S);
+    for (int i = 0; i < S; i++)
+    {
+        points[i] = cv::Point(10 + 100 * X[i], 10 + 100 * Y[i]);
+    }
+    if (strip)
+    {
+        for (int i = 0; i < S - 1; i += 4)
+        {
+            cv::line(image, points[i], points[i + 1], color, 1);
+        }
+    }
+    else
+        cv::polylines(image, points, false, color, 1);
+    cv::circle(image, points.back(), 5, color, CV_FILLED);
+
+    cv::Point pf;
+    pf.x = (10 + 100 * XR[0]) + 10 * cos(XR[2]);
+    pf.y = (10 + 100 * XR[1]) + 10 * sin(XR[2]);
+    cv::line(image, points.back(), pf, color, 2);
 }
