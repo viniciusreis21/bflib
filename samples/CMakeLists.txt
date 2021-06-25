@@ -39,11 +39,11 @@ target_link_libraries(sine bflib ${PYTHON_LIBRARIES})
 add_executable(pendulum pendulum.cpp)
 target_link_libraries(pendulum bflib ${PYTHON_LIBRARIES})
 
-add_executable(robot_localization_pf_spl robot_localization_pf_spl.cpp)
+add_executable(robot_localization_pf_spl robot_localization_pf_spl.cpp ../bflib/Drawing.cpp)
 target_link_libraries(robot_localization_pf_spl bflib ${PYTHON_LIBRARIES} ${OpenCV_LIBS})
 
-add_executable(robot_localization_ekf robot_localization_ekf.cpp)
+add_executable(robot_localization_ekf robot_localization_ekf.cpp ../bflib/Drawing.cpp)
 target_link_libraries(robot_localization_ekf bflib ${PYTHON_LIBRARIES} ${OpenCV_LIBS})
 
-#add_executable(robot_localization_pf robot_localization_pf.cpp)
-#target_link_libraries(robot_localization_pf bflib ${PYTHON_LIBRARIES} ${OpenCV_LIBS})
+add_executable(robot_localization_pf robot_localization_pf.cpp ../bflib/Drawing.cpp)
+target_link_libraries(robot_localization_pf bflib ${PYTHON_LIBRARIES} ${OpenCV_LIBS})

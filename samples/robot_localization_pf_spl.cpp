@@ -1,5 +1,5 @@
 #include <bflib/PF.hpp>
-#include "bflib/Drawing.h"
+#include <bflib/Drawing.h>
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -38,26 +38,7 @@ Robot::State minState(0.000, 0.000, 0);
 Robot::State maxState(4.680, 3.200, 2 * PI);
 
 // World lines
-/*vector<Vector4d> lines{Vector4d(0.000, 0.000, 4.680, 0.000),
-                       Vector4d(0.000, 0.000, 0.000, 3.200),
-                       Vector4d(0.000, 3.200, 4.680, 3.200),
-                       Vector4d(4.680, 0.000, 4.680, 3.200),
-                       Vector4d(2.340, 0.000, 2.340, 3.200), // linha do meio de campo
-                       Vector4d(0.000, 1.010, 0.312, 1.010),
-                       Vector4d(0.000, 2.190, 0.312, 2.190),
-                       Vector4d(0.312, 1.010, 0.312, 2.190),
-                       Vector4d(4.680, 1.010, 4.368, 1.010),
-                       Vector4d(4.680, 2.190, 4.368, 2.190),
-                       Vector4d(4.368, 1.010, 4.368, 2.190),
-                       Vector4d(0.650, 1.600, 0.702, 1.600), // linha horizontal da cruz esquerda
-                       Vector4d(0.676, 1.574, 0.676, 1.626),
-                       Vector4d(3.978, 1.600, 4.030, 1.600),
-                       Vector4d(4.004, 1.574, 4.004, 1.626)};
-// Vector4d(0.000,  2.280,   0.920,   2.280),
-// Vector4d(0.920,  2.280,   0.920,   3.200),
-// Vector4d(4.190,  2.850,   4.680,   2.850),
-// Vector4d(4.190,  2.850,   4.190,   3.200),
-// Vector4d(4.030,  0.000,   4.680,   0.650)  */
+
 
 /*
     The model function
@@ -296,107 +277,14 @@ float hyperbolicSpiral(Robot::State x, float thetaDir, Robot::State goal)
 }
 
 #ifdef PLOT_REALTIME
-/*void drawLines(cv::Mat &image, const vector<Vector4d> &fieldLines.lines, const cv::Scalar &color)
-{
-    for (int i = 0; i < fieldLines.lines.size(); i++)
-    {
-        cv::line(image,
-                 cv::Point(10 + fieldLines.lines[i](0) * 100, 10 + fieldLines.lines[i](1) * 100),
-                 cv::Point(10 + fieldLines.lines[i](2) * 100, 10 + fieldLines.lines[i](3) * 100),
-                 color, 2);
-    }
-}*/
+Drawing fieldLines;
 
 
-void drawParticles(cv::Mat &image, const vector<Robot::State> &PS, const cv::Scalar &color)
-{
-    for (int i = 0; i < PS.size(); i++)
-    {
-        cv::circle(image, cv::Point(10 + 100 * PS[i][0], 10 + 100 * PS[i][1]), 2, color, CV_FILLED);
-    }
-}
-
-void drawFeatures(cv::Mat &image, vector<Vector3d> &PS, const cv::Scalar &color)
-{
-    for (int i = 0; i < PS.size(); i++)
-    {
-        cv::circle(image, cv::Point(PS[i][0], PS[i][1]), 4, color, CV_FILLED);
-    }
-}
-
-void drawPath(cv::Mat &image, const Robot::State &XR, const vector<double> &X, const vector<double> &Y, const cv::Scalar &color, bool strip)
-{
-    int S = min(X.size(), Y.size());
-    vector<cv::Point> points(S);
-    for (int i = 0; i < S; i++)
-    {
-        points[i] = cv::Point(10 + 100 * X[i], 10 + 100 * Y[i]);
-    }
-    if (strip)
-    {
-        for (int i = 0; i < S - 1; i += 4)
-        {
-            cv::line(image, points[i], points[i + 1], color, 1);
-        }
-    }
-    else
-        cv::polylines(image, points, false, color, 1);
-    cv::circle(image, points.back(), 5, color, CV_FILLED);
-
-    cv::Point pf;
-    pf.x = (10 + 100 * XR[0]) + 10 * cos(XR[2]);
-    pf.y = (10 + 100 * XR[1]) + 10 * sin(XR[2]);
-    cv::line(image, points.back(), pf, color, 2);
-}
-
-void drawFieldCenter(cv::Mat &image)
-{   
-    cv::circle(image, cv::Point(244,170), 45, cv::Scalar(0,0,0), 2);
-}
-
-void drawSensor(cv::Mat &image, const Robot::State &X, const cv::Scalar &color)
-{
-    cv::Point2f xSnow, xR,xMid;
-    float aperture = PI/6;
-    float rad = 100;
-    xR.x = (10 + 100 * X[0]);
-    xR.y = (10 + 100 * X[1]);
-
-    xMid.x = xR.x + rad * cos(X[2]);
-    xMid.y = xR.y + rad * sin(X[2]);
-    //cv::circle(image,xR,2, color, 0);
-    for (int i = 0 ; i < int(aperture*57.29f); i++)
-    {
-        xSnow.x = xR.x + rad * cos(X[2]  + 0.01745f * i - aperture*0.5);
-        xSnow.y = xR.y + rad * sin(X[2]  + 0.01745f * i - aperture*0.5);
-
-        cv::line(image, xR, xSnow, cv::Scalar(0, 255, 255, 0), 4, CV_AA, 0);
-        //return cv::line(image,xR,xSnow,cv::Scalar(0,255,255,0), 4,CV_AA,0);
-    }
-    cv::line(image, xR, xMid, cv::Scalar(0, 0, 0, 0), 1, CV_AA, 0);
-}
-
-// void drawSensor(cv::Mat& image, const Robot::State& X, const vector< Robot::Output >& Y, const cv::Scalar& color)
-// {
-//     cv::Point pt1, ptR;
-
-//     ptR.x = 10 + 100 * X[0];
-//     ptR.y = 10 + 100 * X[1];
-
-//     for(int i = 0; i < Y.size(); i++)
-//     {
-//         pt1.x = 10 + 100 * ( X[0] + Y[i][0] * cos( Y[i][1] + X[2] ) );
-//         pt1.y = 10 + 100 * ( X[1] + Y[i][0] * sin( Y[i][1] + X[2] ) );
-//         cv::line(image, ptR, pt1, color, 1);
-//         cv::circle(image, pt1, 3, color, CV_FILLED);
-//     }
-
-// }
 #endif
 
 int main(int argc, char *argv[])
 {
-    Drawing fieldLines;
+    //Drawing fieldLines();
     // Defines the standard deviations for the resample and the sensor
     double sigma_x_x = 0.04;
     double sigma_x_y = 0.04;
@@ -614,20 +502,18 @@ int main(int argc, char *argv[])
 
         // Increment the simulation time
         t += dt;
-
 // Realtime plot
 #ifdef PLOT_REALTIME
         image.setTo(cv::Scalar(255, 255, 255));
-
-        fieldLines.drawLines(image, cv::Scalar(0, 0, 0)); //modificar?
-
-        drawFieldCenter(image);
+        //drawLines(image, lines, cv::Scalar(0, 0, 0)); //modificar?
+        fieldLines.drawLines(image, cv::Scalar(0,0,0));
+        fieldLines.drawFieldCenter(image);
         //drawLines(img, lines, cv::Scalar(0, 0, 0));
-        drawFeatures(image, FeatureMap, cv::Scalar(255, 0, 0));
-        //drawParticles(image, pf.particles(), cv::Scalar(255, 0, 0));
-        drawSensor(image, x, cv::Scalar(0, 255, 0));
+        fieldLines.drawLandmarks(image, FeatureMap, cv::Scalar(255, 0, 0));
+        //fieldLines.drawParticles(image, pf.particles(), cv::Scalar(255, 0, 0));
+        fieldLines.drawSensor(image, x, cv::Scalar(0, 255, 0));
         //drawSensor(image, xP, y, cv::Scalar(0, 255, 0));
-        drawPath(image, x, X, Y, cv::Scalar(0, 0, 0), false);
+        fieldLines.drawPath(image, x, X, Y, cv::Scalar(0, 0, 0), false);
         //drawPath(image, xP, XP, YP, cv::Scalar(0, 0, 255), false);
         DetectFeatures(image,x,y,FeatureMap);
 
@@ -645,14 +531,14 @@ int main(int argc, char *argv[])
 #if defined PLOT && !defined PLOT_REALTIME
     vector<double> x_, y_;
     plt::title("Position");
-    for (int i = 0; i < fieldLines.lines.size(); i++)
+    for (int i = 0; i < lines.size(); i++)
     {
         x_.resize(2);
         y_.resize(2);
-        x_[0] = fieldLines.lines[i](0);
-        y_[0] = fieldLines.lines[i](1);
-        x_[1] = fieldLines.lines[i](2);
-        y_[1] = fieldLines.lines[i](3);
+        x_[0] = lines[i](0);
+        y_[0] = lines[i](1);
+        x_[1] = lines[i](2);
+        y_[1] = lines[i](3);
         plt::plot(x_, y_, "k");
     }
     for (int i = 0; i < pf.particles().size(); i++)
